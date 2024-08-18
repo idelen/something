@@ -1,3 +1,4 @@
 rootProject.name = 'something'
 
 include('backend')
+include('frontend')
