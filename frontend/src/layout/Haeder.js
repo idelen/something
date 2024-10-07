@@ -7,6 +7,8 @@ export default function Header() {
             <Link to={"/"}>홈</Link>
             &nbsp;&nbsp;|&nbsp;&nbsp;
             <Link to={"/board"}>게시판</Link>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <Link to={"/chat"}>채팅</Link>
             <hr/>
         </header>
     )

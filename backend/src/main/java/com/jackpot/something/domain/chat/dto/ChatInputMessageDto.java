@@ -1,11 +1,10 @@
 package com.jackpot.something.domain.chat.dto;
 
-import org.springframework.stereotype.Service;
-
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-@Service
+@Setter
 public class ChatInputMessageDto {
 	private String message;
 	private String sendFrom;
