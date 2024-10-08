@@ -60,7 +60,7 @@ export default function Chat() {
                 destination: "/pub/chat-room/1/send",
                 body: JSON.stringify({
                     message: message,
-                    sendFrom: "나"
+                    sendFrom: sendFrom
                 })
             });
         }
@@ -83,6 +83,12 @@ export default function Chat() {
                     <div>
                         <input
                             type="text"
+                            value={sendFrom}
+                            onChange={(e) => setSendFrom(e.target.value)}
+                            placeholder="Enter your name"
+                        />
+                        <input
+                            type="text"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Enter your message"
@@ -95,12 +101,13 @@ export default function Chat() {
                             <tbody>
                             {greetings.map((greeting, index) => (
                                 <tr key={index}>
-                                    <td><strong>{greeting.sendFrom}</strong>: {greeting.message}</td>
+                                <td><strong>{greeting.sendFrom}</strong>: {greeting.message}</td>
                                 </tr>
                             ))}
                             </tbody>
                         </table>
                     </div>
+
                 </div>
             )}
         </div>
