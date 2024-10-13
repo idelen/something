@@ -11,7 +11,7 @@ function App() {
             <Route path="/" element={<Home/>}/>
             <Route path="/board" element={<BoardList/>}/>
             <Route path="/chat-room" element={<ChatRoomList/>}/>
-            <Route path="/chat-room/:id" element={<Chat/>}/>
+            <Route path="/chat-room/:roomId" element={<Chat/>}/>
         </Routes>
     );
 }

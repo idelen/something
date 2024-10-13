@@ -1,27 +1,38 @@
 import React, { useState, useEffect } from "react";
 import * as StompJs from "@stomp/stompjs";
 import {useParams} from "react-router-dom";
+import axios from "axios";
 
 export default function Chat() {
     const {roomId} = useParams();
 
-    const [stompClient, setStompClient] = useState(null);
-    const [connected, setConnected] = useState(false);
-    const [greetings, setGreetings] = useState([]);
-    const [name, setName] = useState("");
-    const [message, setMessage] = useState(""); // 메시지 입력을 위한 상태
+    const [messages, setMessages] = useState([]); // 채팅 메시지 리스트
+    const [newMessage, setNewMessage] = useState(""); // 새로 입력되는 메시지
     const [sendFrom, setSendFrom] = useState(""); // 발신자 이름 상태
+    const [client, setClient] = useState(null); // WebSocket 클라이언트
 
     useEffect(() => {
+        fetchMessages();
+    }, [roomId]);
+
+    const fetchMessages = async () => {
+        try {
+            const response = await axios.get(`/v1.0/chat-room/${roomId}/messages`);
+            setMessages(response.data);
+        } catch (error) {
+            console.error('Failed to fetch messages', error);
+        }
+    }
+
+    useEffect(() => {
+        console.log(roomId);
         const client = new StompJs.Client({
             brokerURL: 'ws://localhost:8080/ws-stomp',
             onConnect: (frame) => {
-                setConnected(true);
                 console.log('Connected: ' + frame);
-                client.subscribe(`/sub/chat-room/${roomId}/latest-message`, (greeting) => {
-                    const parsedData = JSON.parse(greeting.body); // 서버에서 전달된 내용 파싱
-                    const { message, sendFrom } = parsedData; // ChatInputMessageDto 구조
-                    showGreeting({ message, sendFrom }); // 발신자 이름과 메시지를 함께 보여줌
+                client.subscribe(`/sub/chat-room/${roomId}/latest-message`, (message) => {
+                    const newMsg = JSON.parse(message.body);
+                    setMessages((prevMessages) => [...prevMessages, newMsg]); // 실시간으로 받은 메시지 추가
                 });
             },
             onWebSocketError: (error) => {
@@ -32,87 +43,56 @@ export default function Chat() {
                 console.error('Additional details: ' + frame.body);
             },
         });
+        client.activate(); // WebSocket 연결 시작
+        setClient(client);
 
-        setStompClient(client);
-
-        // Cleanup WebSocket on component unmount
+        // 컴포넌트가 언마운트될 때 WebSocket 연결 해제
         return () => {
             if (client) {
                 client.deactivate();
             }
         };
-    }, []);
-
-    const connect = () => {
-        if (stompClient) {
-            stompClient.activate();
-        }
-    };
-
-    const disconnect = () => {
-        if (stompClient) {
-            stompClient.deactivate();
-            setConnected(false);
-            console.log("Disconnected");
-        }
-    };
+    }, [roomId]);
 
     const sendMessage = () => {
-        if (stompClient && connected) {
-            stompClient.publish({
+        if (client && client.connected) {
+            client.publish({
                 destination: `/pub/chat-room/${roomId}/send`,
                 body: JSON.stringify({
-                    message: message,
+                    message: newMessage,
                     sendFrom: sendFrom
                 })
             });
+            setNewMessage(""); // 메시지 전송 후 입력 필드 초기화
         }
-    };
-
-    const showGreeting = (receivedMessage) => {
-        // receivedMessage에는 message와 sendFrom이 포함됨
-        setGreetings((prevGreetings) => [...prevGreetings, receivedMessage]);
     };
 
     return (
         <div>
+            <h2>Chat Messages for Room {roomId}</h2>
+            <ul>
+                {messages.map((message, index) => (
+                    <li key={index}>
+                        <strong>{message.sendFrom}</strong>: {message.message}
+                    </li>
+                ))}
+            </ul>
+
             <div>
-                <button onClick={connect} disabled={connected}>Connect</button>
-                <button onClick={disconnect} disabled={!connected}>Disconnect</button>
+                <input
+                    type="text"
+                    value={sendFrom}
+                    onChange={(e) => setSendFrom(e.target.value)}
+                    placeholder="Type your name..."
+                />
+                <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type your message..."
+                />
+                <button onClick={sendMessage}>Send</button>
             </div>
-
-            {connected && (
-                <div>
-                    <div>
-                        <input
-                            type="text"
-                            value={sendFrom}
-                            onChange={(e) => setSendFrom(e.target.value)}
-                            placeholder="Enter your name"
-                        />
-                        <input
-                            type="text"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Enter your message"
-                        />
-                        <button onClick={sendMessage}>Send</button>
-                    </div>
-                    <div>
-                        <h3>Messages:</h3>
-                        <table>
-                            <tbody>
-                            {greetings.map((greeting, index) => (
-                                <tr key={index}>
-                                <td><strong>{greeting.sendFrom}</strong>: {greeting.message}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-            )}
         </div>
     );
 }
