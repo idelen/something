@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import * as StompJs from "@stomp/stompjs";
+import {useParams} from "react-router-dom";
 
 export default function Chat() {
+    const {roomId} = useParams();
+
     const [stompClient, setStompClient] = useState(null);
     const [connected, setConnected] = useState(false);
     const [greetings, setGreetings] = useState([]);
@@ -15,7 +18,7 @@ export default function Chat() {
             onConnect: (frame) => {
                 setConnected(true);
                 console.log('Connected: ' + frame);
-                client.subscribe('/sub/chat-room/1/latest-message', (greeting) => {
+                client.subscribe(`/sub/chat-room/${roomId}/latest-message`, (greeting) => {
                     const parsedData = JSON.parse(greeting.body); // 서버에서 전달된 내용 파싱
                     const { message, sendFrom } = parsedData; // ChatInputMessageDto 구조
                     showGreeting({ message, sendFrom }); // 발신자 이름과 메시지를 함께 보여줌
@@ -57,7 +60,7 @@ export default function Chat() {
     const sendMessage = () => {
         if (stompClient && connected) {
             stompClient.publish({
-                destination: "/pub/chat-room/1/send",
+                destination: `/pub/chat-room/${roomId}/send`,
                 body: JSON.stringify({
                     message: message,
                     sendFrom: sendFrom
