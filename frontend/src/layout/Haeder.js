@@ -9,6 +9,8 @@ export default function Header() {
             <Link to={`/board`}>게시판</Link>
             &nbsp;&nbsp;|&nbsp;&nbsp;
             <Link to={`/chat-room`}>채팅</Link>
+            &nbsp;&nbsp;|&nbsp;&nbsp;
+            <Link to={`/signup`}>회원가입</Link>
             <hr/>
         </header>
     )

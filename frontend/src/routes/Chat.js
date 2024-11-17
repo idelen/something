@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import * as StompJs from "@stomp/stompjs";
 import {useParams} from "react-router-dom";
 import axios from "axios";
+import SockJS from "sockjs-client";
+import {Stomp} from "@stomp/stompjs";
 
 export default function Chat() {
     const {roomId} = useParams();
@@ -25,9 +27,17 @@ export default function Chat() {
     }
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
+
+        const socket = new SockJS('/ws-stomp');
+        const stompClient = Stomp.over(socket);
+
         console.log(roomId);
-        const client = new StompJs.Client({
+        const client = new stompClient.Client({
             brokerURL: 'ws://localhost:8080/ws-stomp',
+            connectHeaders: {
+                Authorization: `Bearer ${token}`,
+            },
             onConnect: (frame) => {
                 console.log('Connected: ' + frame);
                 client.subscribe(`/sub/chat-room/${roomId}/latest-message`, (message) => {

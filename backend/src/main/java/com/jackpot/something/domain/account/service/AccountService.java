@@ -3,11 +3,14 @@ package com.jackpot.something.domain.account.service;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.jackpot.something.config.JwtTokenProvider;
 import com.jackpot.something.domain.account.dto.LoginRequest;
 import com.jackpot.something.domain.account.dto.LoginResponse;
+import com.jackpot.something.domain.account.dto.SingUpRequest;
+import com.jackpot.something.domain.account.repository.AccountRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +20,8 @@ public class AccountService {
 
 	private final JwtTokenProvider jwtTokenProvider;
 	private final AuthenticationManager authenticationManager;
+	private final PasswordEncoder passwordEncoder;
+	private final AccountRepository accountRepository;
 
 	public LoginResponse login(LoginRequest loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
@@ -27,5 +32,15 @@ public class AccountService {
 		LoginResponse loginResponse = new LoginResponse();
 		loginResponse.setToken(token);
 		return loginResponse;
+	}
+
+	public LoginResponse signup(SingUpRequest singupRequest) {
+		accountRepository.createNewAccount(singupRequest.getId(), passwordEncoder.encode(singupRequest.getPassword()));
+
+		LoginRequest loginRequest = new LoginRequest();
+		loginRequest.setId(singupRequest.getId());
+		loginRequest.setPassword(singupRequest.getPassword());
+
+		return login(loginRequest);
 	}
 }
