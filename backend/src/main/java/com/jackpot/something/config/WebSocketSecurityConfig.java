@@ -14,11 +14,11 @@ public class WebSocketSecurityConfig {
 	@Bean
 	public AuthorizationManager<Message<?>> messageAuthorizationManager(MessageMatcherDelegatingAuthorizationManager.Builder messages) {
 		messages
-			.nullDestMatcher().authenticated()
+			// .nullDestMatcher().authenticated()
 			.simpSubscribeDestMatchers("/user/queue/errors").permitAll()
 			.simpDestMatchers("/pub/**").authenticated()
 			.simpSubscribeDestMatchers("/sub/**").authenticated()
-			.anyMessage().denyAll();
+			.anyMessage().permitAll();
 
 		return messages.build();
 	}

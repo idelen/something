@@ -5,7 +5,7 @@ import Home from "./routes/Home";
 import ChatRoomList from "./routes/ChatRoomList";
 import Chat from "./routes/Chat";
 import Login from "./routes/Login";
-import PrivateRoute from "./routes/PrivateRoute";
+import PrivateRoute from "./routes/config/PrivateRoute";
 import Signup from "./routes/Signup";
 
 function App() {

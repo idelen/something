@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import * as StompJs from "@stomp/stompjs";
+import React, {useState, useEffect, useRef} from "react";
 import {useParams} from "react-router-dom";
-import axios from "axios";
 import SockJS from "sockjs-client";
-import {Stomp} from "@stomp/stompjs";
+import {Client} from "@stomp/stompjs";
+import api from "./config/api";
 
 export default function Chat() {
     const {roomId} = useParams();
@@ -11,7 +10,7 @@ export default function Chat() {
     const [messages, setMessages] = useState([]); // 채팅 메시지 리스트
     const [newMessage, setNewMessage] = useState(""); // 새로 입력되는 메시지
     const [sendFrom, setSendFrom] = useState(""); // 발신자 이름 상태
-    const [client, setClient] = useState(null); // WebSocket 클라이언트
+    const clientRef = useRef(null);
 
     useEffect(() => {
         fetchMessages();
@@ -19,7 +18,7 @@ export default function Chat() {
 
     const fetchMessages = async () => {
         try {
-            const response = await axios.get(`/v1.0/chat-room/${roomId}/messages`);
+            const response = await api.get(`/v1.0/chat-room/${roomId}/messages`);
             setMessages(response.data);
         } catch (error) {
             console.error('Failed to fetch messages', error);
@@ -29,12 +28,10 @@ export default function Chat() {
     useEffect(() => {
         const token = localStorage.getItem('token');
 
-        const socket = new SockJS('/ws-stomp');
-        const stompClient = Stomp.over(socket);
+        const socket = new SockJS('http://localhost:8080/ws-stomp');
 
-        console.log(roomId);
-        const client = new stompClient.Client({
-            brokerURL: 'ws://localhost:8080/ws-stomp',
+        const client = new Client({
+            webSocketFactory: () => socket,
             connectHeaders: {
                 Authorization: `Bearer ${token}`,
             },
@@ -43,6 +40,8 @@ export default function Chat() {
                 client.subscribe(`/sub/chat-room/${roomId}/latest-message`, (message) => {
                     const newMsg = JSON.parse(message.body);
                     setMessages((prevMessages) => [...prevMessages, newMsg]); // 실시간으로 받은 메시지 추가
+                }, {
+                    Authorization: `Bearer ${token}`
                 });
             },
             onWebSocketError: (error) => {
@@ -54,24 +53,30 @@ export default function Chat() {
             },
         });
         client.activate(); // WebSocket 연결 시작
-        setClient(client);
+
+        clientRef.current = client;
 
         // 컴포넌트가 언마운트될 때 WebSocket 연결 해제
         return () => {
-            if (client) {
-                client.deactivate();
+            if (clientRef.current) {
+                clientRef.current.deactivate();
             }
         };
     }, [roomId]);
 
     const sendMessage = () => {
-        if (client && client.connected) {
-            client.publish({
+        const token = localStorage.getItem('token');
+
+        if (clientRef.current && clientRef.current.connected) {
+            clientRef.current.publish({
                 destination: `/pub/chat-room/${roomId}/send`,
                 body: JSON.stringify({
                     message: newMessage,
                     sendFrom: sendFrom
-                })
+                }),
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
             setNewMessage(""); // 메시지 전송 후 입력 필드 초기화
         }

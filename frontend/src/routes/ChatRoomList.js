@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
-import axios from "axios";
 import {Link} from "react-router-dom";
+import api from "./config/api";
 
 export default function ChatRoomList() {
     const [chatRooms, setChatRooms] = useState([]); // 채팅방 리스트 상태
@@ -15,7 +15,7 @@ export default function ChatRoomList() {
 
     const fetchChatRooms = async () => {
         try {
-            const response = await axios.get("/v1.0/chat-rooms"); // API 호출
+            const response = await api.get("/v1.0/chat-rooms"); // API 호출
             setChatRooms(response.data); // 응답 데이터를 상태로 설정
         } catch (error) {
             console.error("Failed to fetch chat rooms", error);
@@ -41,7 +41,7 @@ export default function ChatRoomList() {
                 name: newRoomName,
                 creatorName: creatorName,
             };
-            await axios.post("/v1.0/chat-room", requestBody); // 채팅방 생성 API 호출
+            await api.post("/v1.0/chat-room", requestBody); // 채팅방 생성 API 호출
             fetchChatRooms(); // 채팅방 목록 갱신
             closePopup(); // 팝업 닫기
         } catch (error) {

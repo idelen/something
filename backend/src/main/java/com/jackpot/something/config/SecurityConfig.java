@@ -31,10 +31,9 @@ public class SecurityConfig {
 		http
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.csrf(AbstractHttpConfigurer::disable)
-			.sessionManagement(httpSecuritySessionManagementConfigurer ->
-				httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.sessionManagement(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(authorize -> authorize
-				.requestMatchers("/auth/login", "/auth/signup").permitAll()
+				.requestMatchers("/auth/login", "/auth/signup", "/ws-stomp/**").permitAll()
 				.anyRequest().authenticated()
 			)
 			// .formLogin(form -> form.loginPage("/login")
