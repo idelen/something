@@ -1,7 +1,7 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import SockJS from "sockjs-client";
-import {Client} from "@stomp/stompjs";
+import {Client, Stomp} from "@stomp/stompjs";
 import api from "./config/api";
 
 export default function Chat() {
@@ -28,39 +28,36 @@ export default function Chat() {
     useEffect(() => {
         const token = localStorage.getItem('token');
 
-        const socket = new SockJS('http://localhost:8080/ws-stomp');
-
-        const client = new Client({
-            webSocketFactory: () => socket,
-            connectHeaders: {
-                Authorization: `Bearer ${token}`,
-            },
-            onConnect: (frame) => {
-                console.log('Connected: ' + frame);
-                client.subscribe(`/sub/chat-room/${roomId}/latest-message`, (message) => {
-                    const newMsg = JSON.parse(message.body);
-                    setMessages((prevMessages) => [...prevMessages, newMsg]); // 실시간으로 받은 메시지 추가
-                }, {
-                    Authorization: `Bearer ${token}`
-                });
-            },
-            onWebSocketError: (error) => {
-                console.error('Error with websocket', error);
-            },
-            onStompError: (frame) => {
-                console.error('Broker reported error: ' + frame.headers['message']);
-                console.error('Additional details: ' + frame.body);
-            },
+        const socket = new SockJS('http://localhost:8080/ws-stomp', null, {
+            timeout: 10000,
+            heartbeat_delay: 5000,
         });
-        client.activate(); // WebSocket 연결 시작
 
-        clientRef.current = client;
+        const stompClient = Stomp.over(socket);
+        // heart-beat 설정
+        stompClient.heartbeat.outgoing = 10000; // 클라이언트에서 서버로 보내는 주기 (밀리초)
+        stompClient.heartbeat.incoming = 10000; // 서버에서 클라이언트로 받는 주기 (밀리초)
+
+        stompClient.connect({
+            Authorization: `Bearer ${token}`,
+        }, (frame) => {
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe(`/sub/chat-room/${roomId}/latest-message`, (message) => {
+                const newMsg = JSON.parse(message.body);
+                setMessages((prevMessages) => [...prevMessages, newMsg]); // 실시간으로 받은 메시지 추가
+            }, {
+                Authorization: `Bearer ${token}`
+            });
+        }, (error) => {
+            console.log('STOMP connection error: ' + error);
+        })
 
         // 컴포넌트가 언마운트될 때 WebSocket 연결 해제
         return () => {
-            if (clientRef.current) {
-                clientRef.current.deactivate();
-            }
+            stompClient.disconnect(() => {
+                console.log("STOMP 정상 해제");
+            })
         };
     }, [roomId]);
 

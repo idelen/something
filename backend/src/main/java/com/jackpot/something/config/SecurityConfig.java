@@ -34,7 +34,7 @@ public class SecurityConfig {
 			.sessionManagement(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(authorize -> authorize
 				.requestMatchers("/auth/login", "/auth/signup", "/ws-stomp/**").permitAll()
-				.anyRequest().authenticated()
+				.anyRequest().permitAll()
 			)
 			// .formLogin(form -> form.loginPage("/login")
 			// 	.permitAll()
