@@ -10,7 +10,7 @@ export default function Chat() {
     const [messages, setMessages] = useState([]); // 채팅 메시지 리스트
     const [newMessage, setNewMessage] = useState(""); // 새로 입력되는 메시지
     const [sendFrom, setSendFrom] = useState(""); // 발신자 이름 상태
-    const clientRef = useRef(null);
+    const clientRef = useRef<Client | null> (null);
 
     useEffect(() => {
         fetchMessages();
@@ -28,36 +28,62 @@ export default function Chat() {
     useEffect(() => {
         const token = localStorage.getItem('token');
 
-        const socket = new SockJS('http://localhost:8080/ws-stomp', null, {
-            timeout: 10000,
-            heartbeat_delay: 5000,
-        });
+        console.log(token);
 
-        const stompClient = Stomp.over(socket);
-        // heart-beat 설정
-        stompClient.heartbeat.outgoing = 10000; // 클라이언트에서 서버로 보내는 주기 (밀리초)
-        stompClient.heartbeat.incoming = 10000; // 서버에서 클라이언트로 받는 주기 (밀리초)
+        const connect = () => {
+            if (clientRef.current && clientRef.current.connected) {
+                clientRef.current.deactivate();
+            }
 
-        stompClient.connect({
-            Authorization: `Bearer ${token}`,
-        }, (frame) => {
-            console.log('Connected: ' + frame);
-
-            stompClient.subscribe(`/sub/chat-room/${roomId}/latest-message`, (message) => {
-                const newMsg = JSON.parse(message.body);
-                setMessages((prevMessages) => [...prevMessages, newMsg]); // 실시간으로 받은 메시지 추가
-            }, {
-                Authorization: `Bearer ${token}`
+            clientRef.current = new Client({
+                connectHeaders: {
+                    Authorization: `Bearer ${token}`,
+                },
+                webSocketFactory: () => new SockJS('http://localhost:8080/ws-stomp'),
+                onConnect: () => {
+                    if (clientRef.current?.connected) {
+                        console.log('connect');
+                    }
+                },
+                onDisconnect: () => {
+                    console.log("disconnect");
+                },
             });
-        }, (error) => {
-            console.log('STOMP connection error: ' + error);
-        })
+            clientRef.current.activate();
+        }
+
+
+        // const socket = new SockJS('http://localhost:8080/ws-stomp', null, {
+        //     timeout: 10000,
+        //     heartbeat_delay: 5000,
+        // });
+        //
+        // const stompClient = Stomp.over(socket);
+        // // heart-beat 설정
+        // stompClient.heartbeat.outgoing = 10000; // 클라이언트에서 서버로 보내는 주기 (밀리초)
+        // stompClient.heartbeat.incoming = 10000; // 서버에서 클라이언트로 받는 주기 (밀리초)
+        //
+        // stompClient.connect({
+        //     Authorization: `Bearer ${token}`,
+        // }, (frame) => {
+        //     console.log('Connected: ' + frame);
+        //
+        //     stompClient.subscribe(`/sub/chat-room/${roomId}/latest-message`, (message) => {
+        //         const newMsg = JSON.parse(message.body);
+        //         setMessages((prevMessages) => [...prevMessages, newMsg]); // 실시간으로 받은 메시지 추가
+        //     }, {
+        //         Authorization: `Bearer ${token}`
+        //     });
+        // }, (error) => {
+        //     console.log('STOMP connection error: ' + error);
+        // })
 
         // 컴포넌트가 언마운트될 때 WebSocket 연결 해제
+
+        connect();
+
         return () => {
-            stompClient.disconnect(() => {
-                console.log("STOMP 정상 해제");
-            })
+            console.log("연결 해제해야하는데?")
         };
     }, [roomId]);
 
