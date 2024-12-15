@@ -6,6 +6,8 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +28,8 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
 				token = token.substring(7);
 				if (jwtTokenProvider.validateToken(token)) {
 					String username = jwtTokenProvider.getUsername(token);
-					accessor.setUser(() -> username);
+					Authentication auth = new UsernamePasswordAuthenticationToken(username, null, null);
+					accessor.setUser(auth);
 				} else {
 					throw new JwtException("Invalid token");
 				}

@@ -36,11 +36,7 @@ public class SecurityConfig {
 				.requestMatchers("/auth/login", "/auth/signup", "/ws-stomp/**").permitAll()
 				.anyRequest().permitAll()
 			)
-			// .formLogin(form -> form.loginPage("/login")
-			// 	.permitAll()
-			// )
-			.logout(LogoutConfigurer::permitAll)
-			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
 		;
 
 		return http.build();

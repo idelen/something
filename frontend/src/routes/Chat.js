@@ -4,13 +4,14 @@ import SockJS from "sockjs-client";
 import {Client, Stomp} from "@stomp/stompjs";
 import api from "./config/api";
 
+
 export default function Chat() {
     const {roomId} = useParams();
 
     const [messages, setMessages] = useState([]); // 채팅 메시지 리스트
     const [newMessage, setNewMessage] = useState(""); // 새로 입력되는 메시지
     const [sendFrom, setSendFrom] = useState(""); // 발신자 이름 상태
-    const clientRef = useRef<Client | null> (null);
+    const clientRef = useRef(Client);
 
     useEffect(() => {
         fetchMessages();
@@ -31,7 +32,9 @@ export default function Chat() {
         console.log(token);
 
         const connect = () => {
+            console.log(clientRef.current.connected);
             if (clientRef.current && clientRef.current.connected) {
+                console.log("이미 연결되어있음!!");
                 clientRef.current.deactivate();
             }
 
@@ -40,16 +43,21 @@ export default function Chat() {
                     Authorization: `Bearer ${token}`,
                 },
                 webSocketFactory: () => new SockJS('http://localhost:8080/ws-stomp'),
-                onConnect: () => {
-                    if (clientRef.current?.connected) {
-                        console.log('connect');
-                    }
+                onConnect: (frame) => {
+                        console.log('Connected: ' + frame);
+                        clientRef.current.subscribe(`/sub/chat-room/${roomId}/latest-message`, (message) => {
+                            const newMsg = JSON.parse(message.body);
+                            setMessages((prevMessages) => [...prevMessages, newMsg]); // 실시간으로 받은 메시지 추가
+                        }, {
+                            Authorization: `Bearer ${token}`
+                        });
                 },
                 onDisconnect: () => {
                     console.log("disconnect");
                 },
             });
             clientRef.current.activate();
+            console.log(clientRef.current.connected);
         }
 
 
@@ -82,12 +90,16 @@ export default function Chat() {
 
         connect();
 
+        console.log("connect 됐나?");
+
         return () => {
             console.log("연결 해제해야하는데?")
         };
     }, [roomId]);
 
     const sendMessage = () => {
+        console.log("전송버튼!!");
+
         const token = localStorage.getItem('token');
 
         if (clientRef.current && clientRef.current.connected) {

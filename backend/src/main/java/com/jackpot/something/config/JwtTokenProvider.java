@@ -24,7 +24,7 @@ public class JwtTokenProvider {
 
 		return Jwts.builder()
 			.setClaims(claims)
-			.setIssuedAt(validity)
+			.setIssuedAt(now)
 			.setExpiration(validity)
 			.signWith(key)
 			.compact();
