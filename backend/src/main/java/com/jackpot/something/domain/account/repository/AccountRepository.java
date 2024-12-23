@@ -15,12 +15,14 @@ import lombok.RequiredArgsConstructor;
 public class AccountRepository {
 
 	private Map<Long, Account> accountMap = new HashMap<>();
+	private Long accountKey = 1L;
 
 	public void createNewAccount(String userId, String password) {
 		Account account = new Account();
 		account.setUserId(userId);
 		account.setPassword(password);
-		accountMap.put(account.getId(), account);
+		account.setId(accountKey);
+		accountMap.put(accountKey++, account);
 	}
 
 	public Optional<Account> findByUserId(String userId) {

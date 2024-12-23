@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthenticationFilter extends GenericFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;
+	private final CustomUserDetailService customUserDetailService;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
@@ -26,8 +28,9 @@ public class JwtAuthenticationFilter extends GenericFilter {
 
 		if (token != null && jwtTokenProvider.validateToken(token)) {
 			String username = jwtTokenProvider.getUsername(token);
+			UserDetails customUserDetail = customUserDetailService.loadUserByUsername(username);
 
-			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null, null);
+			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(customUserDetail, null, null);
 			auth.setDetails(new WebAuthenticationDetailsSource().buildDetails((HttpServletRequest) request));
 
 			SecurityContextHolder.getContext().setAuthentication(auth);
