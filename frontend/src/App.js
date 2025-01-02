@@ -11,6 +11,7 @@ import {useEffect, useState} from "react";
 import Header from "./layout/Haeder";
 import Footer from "./layout/Footer";
 import axios from "axios";
+import Sidebar from "./layout/Sidebar";
 
 function App() {
     const [currentUser, setCurrentUser] = useState(null);
@@ -33,6 +34,7 @@ function App() {
 
     return (
         <>
+            <Sidebar/>
             <Header currentUser={currentUser}/>
             <Routes>
                 <Route path="/" element={<Home/>}/>
