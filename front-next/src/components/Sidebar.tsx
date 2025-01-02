@@ -34,6 +34,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 import { closeSidebar } from '@/app/utils';
 import ColorSchemeToggle from './ColorSchemeToggle';
+import Link from 'next/link';
 
 function Toggler(props: {
   defaultExpanded?: boolean;
@@ -214,7 +215,7 @@ export default function Sidebar() {
             </Toggler>
           </ListItem>
           <ListItem>
-            <ListItemButton selected>
+            <ListItemButton component={Link} href='/chat-room'>
               <QuestionAnswerRoundedIcon />
               <ListItemContent>
                 <Typography level="title-sm">Messages</Typography>

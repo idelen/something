@@ -1,20 +1,9 @@
-import Header from "@/components/Header";
-import MyMessages from "@/components/MyMessages";
-import Sidebar from "@/components/Sidebar";
-import { Box, CssBaseline, CssVarsProvider } from "@mui/joy";
-
 
 export default function Home() {
   return (
-    <CssVarsProvider disableTransitionOnChange>
-      <CssBaseline />
-      <Box sx={{ display: 'flex', minHeight: '100dvh' }}>
-        <Sidebar />
-        <Header />
-        <Box component="main" className="MainContent" sx={{ flex: 1 }}>
-          <MyMessages />
-        </Box>
-      </Box>
-    </CssVarsProvider>
+    <div style={{ padding: 16 }}>
+      <h1>Home Page</h1>
+      <p>여기에 원하는 홈 화면 내용을 넣으세요.</p>
+    </div>
   );
 }
