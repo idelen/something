@@ -1,15 +1,14 @@
 'use client'
 
-import * as React from 'react';
-import Sheet from '@mui/joy/Sheet';
-import { ChatProps } from '@/app/types';
-import ChatsPane from './ChatsPane';
-import { chats } from '@/app/data';
-import MessagesPane from './MessagesPane';
+import * as React from 'react'
+import Sheet from '@mui/joy/Sheet'
+import { ChatProps } from '@/app/types'
+import ChatsPane from './ChatsPane'
+import { chats } from '@/app/data'
+import MessagesPane from './MessagesPane'
 
-
-export default function MyProfile() {
-  const [selectedChat, setSelectedChat] = React.useState<ChatProps>(chats[0]);
+export default function MyMessages() {
+  const [selectedChat, setSelectedChat] = React.useState<ChatProps>(chats[0])
   return (
     <Sheet
       sx={{
@@ -45,5 +44,5 @@ export default function MyProfile() {
       </Sheet>
       <MessagesPane chat={selectedChat} />
     </Sheet>
-  );
+  )
 }

@@ -8,4 +8,9 @@ import lombok.Setter;
 public class ChatInputMessageDto {
 	private String message;
 	private String sendFrom;
+
+	public ChatInputMessageDto(String message, String sendFrom) {
+		this.message = message;
+		this.sendFrom = sendFrom;
+	}
 }

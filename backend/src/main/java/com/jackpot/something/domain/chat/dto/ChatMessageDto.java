@@ -1,6 +1,6 @@
 package com.jackpot.something.domain.chat.dto;
 
-import java.util.List;
+import java.time.ZonedDateTime;
 
 import com.jackpot.something.domain.account.dto.AccountDto;
 
@@ -9,8 +9,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChatRoomItemResponse {
+public class ChatMessageDto {
 	private Long id;
+	private String content;
+	private ZonedDateTime timestamp;
+	private Boolean unread;
 	private AccountDto sender;
-	private List<ChatMessageDto> messages;
 }

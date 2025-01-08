@@ -26,7 +26,7 @@ public class ChatMessageController {
 
 	@MessageMapping(CHAT_ROOM_SEND_MESSAGE_PUB_URL)
 	public void publishChatRoomMessage(
-		@DestinationVariable Integer roomId,
+		@DestinationVariable Long roomId,
 		@Payload ChatInputMessageDto messageDto
 	) {
 		chatMessageService.sendMessage(roomId, messageDto);
@@ -35,7 +35,7 @@ public class ChatMessageController {
 	@ResponseBody
 	@GetMapping("/v1.0/chat-room/{roomId}/messages")
 	public ResponseEntity<List<ChatInputMessageDto>> getAllChatMessage(
-		@PathVariable Integer roomId
+		@PathVariable Long roomId
 	) {
 		return ResponseEntity.ok(chatMessageService.getAllChatMessage(roomId));
 	}

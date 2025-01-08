@@ -1,24 +1,24 @@
-import * as React from 'react';
-import Stack from '@mui/joy/Stack';
-import Sheet from '@mui/joy/Sheet';
-import Typography from '@mui/joy/Typography';
-import { Box, Chip, IconButton, Input } from '@mui/joy';
-import List from '@mui/joy/List';
-import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { ChatProps } from '@/app/types';
-import { toggleMessagesPane } from '@/app/utils';
-import ChatListItem from './ChatListItem';
+import * as React from 'react'
+import Stack from '@mui/joy/Stack'
+import Sheet from '@mui/joy/Sheet'
+import Typography from '@mui/joy/Typography'
+import { Box, Chip, IconButton, Input } from '@mui/joy'
+import List from '@mui/joy/List'
+import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded'
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
+import { ChatProps } from '@/app/types'
+import { toggleMessagesPane } from '@/app/utils'
+import ChatListItem from './ChatListItem'
 
 type ChatsPaneProps = {
-  chats: ChatProps[];
-  setSelectedChat: (chat: ChatProps) => void;
-  selectedChatId: string;
-};
+  chats: ChatProps[]
+  setSelectedChat: (chat: ChatProps) => void
+  selectedChatId?: string
+}
 
 export default function ChatsPane(props: ChatsPaneProps) {
-  const { chats, setSelectedChat, selectedChatId } = props;
+  const { chats, setSelectedChat, selectedChatId } = props
   return (
     <Sheet
       sx={{
@@ -31,7 +31,12 @@ export default function ChatsPane(props: ChatsPaneProps) {
       <Stack
         direction="row"
         spacing={1}
-        sx={{ alignItems: 'center', justifyContent: 'space-between', p: 2, pb: 1.5 }}
+        sx={{
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          p: 2,
+          pb: 1.5,
+        }}
       >
         <Typography
           component="h1"
@@ -45,7 +50,11 @@ export default function ChatsPane(props: ChatsPaneProps) {
               4
             </Chip>
           }
-          sx={{ fontSize: { xs: 'md', md: 'lg' }, fontWeight: 'lg', mr: 'auto' }}
+          sx={{
+            fontSize: { xs: 'md', md: 'lg' },
+            fontWeight: 'lg',
+            mr: 'auto',
+          }}
         >
           Messages
         </Typography>
@@ -64,7 +73,7 @@ export default function ChatsPane(props: ChatsPaneProps) {
           color="neutral"
           size="sm"
           onClick={() => {
-            toggleMessagesPane();
+            toggleMessagesPane()
           }}
           sx={{ display: { sm: 'none' } }}
         >
@@ -96,5 +105,5 @@ export default function ChatsPane(props: ChatsPaneProps) {
         ))}
       </List>
     </Sheet>
-  );
+  )
 }

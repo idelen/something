@@ -9,4 +9,5 @@ public class Account {
 	private Long id;
 	private String userId;
 	private String password;
+	private String username;
 }

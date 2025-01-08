@@ -19,12 +19,12 @@ public class ChatMessageService {
 	private final ChatMessageRepository chatMessageRepository;
 	private final SimpMessageSendingOperations messagingTemplate;
 
-	public void sendMessage(Integer roomId, ChatInputMessageDto messageDto) {
+	public void sendMessage(Long roomId, ChatInputMessageDto messageDto) {
 		chatMessageRepository.saveChatMessage(roomId, messageDto);
 		messagingTemplate.convertAndSend(CHAT_ROOM_LATEST_MESSAGE_SUB_URL_FORMAT.formatted(roomId), messageDto);
 	}
 
-	public List<ChatInputMessageDto> getAllChatMessage(Integer roomId) {
+	public List<ChatInputMessageDto> getAllChatMessage(Long roomId) {
 		return chatMessageRepository.getChatMessageList(roomId);
 	}
 }

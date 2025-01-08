@@ -8,4 +8,9 @@ import lombok.Setter;
 public class ChatRoomCreateRequest {
 	private String name;
 	private String creatorName;
+
+	public ChatRoomCreateRequest(String name, String creatorName) {
+		this.name = name;
+		this.creatorName = creatorName;
+	}
 }
