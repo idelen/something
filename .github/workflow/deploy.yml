@@ -1,0 +1,89 @@
+name: Docker Build & Deploy to EC2
+
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Checkout
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # 2) Set up JDK & Build Spring Boot Jar
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build Spring Boot
+        run: |
+          cd backend
+          ./gradlew clean build
+
+      # 3) Build Docker Image for Spring
+      - name: Build Backend Docker Image
+        run: |
+          cd backend
+          docker build -t jackpot/something-backend:latest .
+
+      # 4) Set up Node & Build Next.js
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Build Next.js
+        run: |
+          cd front-next
+          npm install
+          npm run build
+      - name: Build Docker Image for Frontend
+        run: |
+          cd frontend
+          docker build -t jackpot/something-frontend:latest .
+
+      # 5) Login to Docker Hub
+      - name: Docker Hub Login
+        run: |
+          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      # 6) Push Images to Docker Hub
+      - name: Push Docker Images
+        run: |
+          docker push jackpot/something-backend:latest
+          docker push jackpot/something-frontend:latest
+
+      # 7) SSH key setup for EC2
+      - name: Start SSH Agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      # 8) SSH into EC2 & deploy containers
+      - name: Deploy on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@YOUR_EC2_IP << 'EOF'
+            # Pull new images
+            docker pull jackpot/something-backend:latest
+            docker pull jackpot/something-frontend:latest
+
+            # Stop & remove old containers if running
+            docker rm -f spring-container || true
+            docker rm -f next-container || true
+
+            # Run backend container
+            docker run -d --name spring-container \
+              -p 8080:8080 \
+              jackpot/something-backend:latest
+
+            # Run nextjs container
+            # For SSR: 3000 -> 3000
+            docker run -d --name next-container \
+              -p 3000:3000 \
+              jackpot/something-frontend:latest
+
+            # [Optional] Use Docker network or Nginx if needed
+          EOF
