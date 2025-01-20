@@ -5,7 +5,7 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 # jar 파일을 컨테이너에 복사 (아래 단계에서 jar 생성된 후에)
-COPY build/libs/myapp.jar /app/myapp.jar
+COPY build/libs/*.jar /app/myapp.jar
 
 # Spring Boot 8080 포트
 EXPOSE 8080
