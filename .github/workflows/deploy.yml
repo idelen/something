@@ -26,8 +26,7 @@ jobs:
       # 3) Build Docker Image for Spring
       - name: Build Backend Docker Image
         run: |
-          cd backend
-          docker build -t jackpot/something-backend:latest .
+          docker build -t jackpot/something-backend:latest -f backend/Dockerfile .
 
       # 4) Set up Node & Build Next.js
       - name: Set up Node
