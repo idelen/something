@@ -35,7 +35,7 @@ jobs:
           pwd
           echo "==== List top-level files ===="
           ls -al
-          docker build -t jackpot/something-backend:latest .
+          docker build -t jackpot/something-backend:latest -f DockerFile .
 
       # 4) Set up Node & Build Next.js
       - name: Set up Node
@@ -50,7 +50,7 @@ jobs:
       - name: Build Docker Image for Frontend
         run: |
           cd frontend
-          docker build -t jackpot/something-frontend:latest .
+          docker build -t jackpot/something-frontend:latest -f DockerFile .
 
       # 5) Login to Docker Hub
       - name: Docker Hub Login
