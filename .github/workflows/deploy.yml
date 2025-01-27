@@ -41,7 +41,7 @@ jobs:
           npm run build
       - name: Build Docker Image for Frontend
         run: |
-          cd frontend
+          cd front-next
           docker build -t jackpot/something-frontend:latest -f DockerFile .
 
       # 5) Login to Docker Hub
