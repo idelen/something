@@ -25,7 +25,7 @@ jobs:
       - name: Build Docker image (Spring)
         run: |
           cd backend
-          docker build -t chjackpot/something-backend:latest -f Dockerfile .
+          docker build -t chjackpot/something-backend:latest -f DockerFile .
 
       # 3) Build Next.js
       - name: Set up Node
@@ -42,13 +42,13 @@ jobs:
       - name: Build Docker image (Next)
         run: |
           cd front-next
-          docker build -t chjackpot/something-frontend:latest -f Dockerfile .
+          docker build -t chjackpot/something-frontend:latest -f DockerFile .
 
       # 5) Build Docker image for Nginx
       - name: Build Docker image (Nginx)
         run: |
           cd nginx
-          docker build -t chjackpot/something-nginx:latest -f Dockerfile .
+          docker build -t chjackpot/something-nginx:latest -f DockerFile .
 
       # 6) Docker login
       - name: DockerHub Login
