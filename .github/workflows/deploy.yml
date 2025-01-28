@@ -1,19 +1,17 @@
-name: Docker Build & Deploy to EC2
+name: Docker Build & Deploy with Nginx
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # 1) Checkout
       - name: Checkout
         uses: actions/checkout@v3
 
-      # 2) Set up JDK & Build Spring Boot Jar
+      # 1) Build Spring jar
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -21,15 +19,16 @@ jobs:
           java-version: 17
       - name: Build Spring Boot
         run: |
+          cd backend
           ./gradlew clean build
 
-      # 3) Build Docker Image for Spring
-      - name: Build Backend Docker Image
+      # 2) Build Docker image for Spring
+      - name: Build Docker image (Spring)
         run: |
           cd backend
-          docker build -t chjackpot/something-backend:latest -f DockerFile .
+          docker build -t chjackpot/something-backend:latest -f Dockerfile .
 
-      # 4) Set up Node & Build Next.js
+      # 3) Build Next.js
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
@@ -39,50 +38,47 @@ jobs:
           cd front-next
           npm install
           npm run build
-      - name: Build Docker Image for Frontend
+
+      # 4) Build Docker image for Next
+      - name: Build Docker image (Next)
         run: |
           cd front-next
-          docker build -t chjackpot/something-frontend:latest -f DockerFile .
+          docker build -t chjackpot/something-frontend:latest -f Dockerfile .
 
-      # 5) Login to Docker Hub
-      - name: Docker Hub Login
+      # 5) Build Docker image for Nginx
+      - name: Build Docker image (Nginx)
+        run: |
+          cd nginx
+          docker build -t chjackpot/something-nginx:latest -f Dockerfile .
+
+      # 6) Docker login
+      - name: DockerHub Login
         run: |
           echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 6) Push Images to Docker Hub
-      - name: Push Docker Images
+      # 7) Push images
+      - name: Push Docker images
         run: |
           docker push chjackpot/something-backend:latest
           docker push chjackpot/something-frontend:latest
+          docker push chjackpot/something-nginx:latest
 
-      # 7) SSH key setup for EC2
-      - name: Start SSH Agent
+      # 8) SSH to EC2 & docker-compose up
+      - name: SSH & Deploy
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      # 8) SSH into EC2 & deploy containers
+      - name: Copy docker-compose to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no docker-compose.yml ec2-user@YOUR_EC2_IP:/home/ec2-user/docker-compose.yml
+
       - name: Deploy on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@52.79.148.37 << 'EOF'
-            # Pull new images
+          ssh -o StrictHostKeyChecking=no ec2-user@YOUR_EC2_IP << 'EOF'
             docker pull chjackpot/something-backend:latest
             docker pull chjackpot/something-frontend:latest
-
-            # Stop & remove old containers if running
-            docker rm -f spring-container || true
-            docker rm -f next-container || true
-
-            # Run backend container
-            docker run -d --name spring-container \
-              -p 8080:8080 \
-              chjackpot/something-backend:latest
-
-            # Run nextjs container
-            # For SSR: 3000 -> 3000
-            docker run -d --name next-container \
-              -p 3000:3000 \
-              chjackpot/something-frontend:latest
-
-            # [Optional] Use Docker network or Nginx if needed
+            docker pull chjackpot/something-nginx:latest
+          
+            docker compose -f /home/ec2-user/docker-compose.yml up -d
           EOF

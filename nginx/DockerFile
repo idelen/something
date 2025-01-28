@@ -1,0 +1,12 @@
+FROM nginx:stable-alpine
+
+# remove default config if needed
+RUN rm /etc/nginx/conf.d/default.conf
+
+# copy our custom config
+COPY default.conf /etc/nginx/conf.d/
+
+EXPOSE 80
+# EXPOSE 443 (if SSL in container)
+
+CMD ["nginx", "-g", "daemon off;"]
