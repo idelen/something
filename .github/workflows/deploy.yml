@@ -19,7 +19,6 @@ jobs:
           java-version: 17
       - name: Build Spring Boot
         run: |
-          cd backend
           ./gradlew clean build
 
       # 2) Build Docker image for Spring
