@@ -71,11 +71,11 @@ jobs:
 
       - name: Copy docker-compose to EC2
         run: |
-          scp -o StrictHostKeyChecking=no docker-compose.yml ec2-user@YOUR_EC2_IP:/home/ec2-user/docker-compose.yml
+          scp -o StrictHostKeyChecking=no docker-compose.yml ec2-user@52.79.148.37:/home/ec2-user/docker-compose.yml
 
       - name: Deploy on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@YOUR_EC2_IP << 'EOF'
+          ssh -o StrictHostKeyChecking=no ec2-user@52.79.148.37 << 'EOF'
             docker pull chjackpot/something-backend:latest
             docker pull chjackpot/something-frontend:latest
             docker pull chjackpot/something-nginx:latest
