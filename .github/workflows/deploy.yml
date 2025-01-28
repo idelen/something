@@ -64,7 +64,7 @@ jobs:
       # 8) SSH into EC2 & deploy containers
       - name: Deploy on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@YOUR_EC2_IP << 'EOF'
+          ssh -o StrictHostKeyChecking=no ec2-user@52.79.148.37 << 'EOF'
             # Pull new images
             docker pull chjackpot/something-backend:latest
             docker pull chjackpot/something-frontend:latest
