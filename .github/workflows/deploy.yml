@@ -79,5 +79,5 @@ jobs:
             docker pull chjackpot/something-frontend:latest
             docker pull chjackpot/something-nginx:latest
           
-            docker compose -f /home/ec2-user/docker-compose.yml up -d
+            docker-compose -f /home/ec2-user/docker-compose.yml up -d
           EOF
