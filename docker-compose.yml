@@ -29,5 +29,5 @@ services:
       - something-net
 
 networks:
-  mynet:
+  something-net:
     driver: bridge
