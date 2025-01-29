@@ -1,0 +1,83 @@
+name: Docker Build & Deploy with Nginx
+
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # 1) Build Spring jar
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Build Spring Boot
+        run: |
+          ./gradlew clean build
+
+      # 2) Build Docker image for Spring
+      - name: Build Docker image (Spring)
+        run: |
+          cd backend
+          docker build -t chjackpot/something-backend:latest -f DockerFile .
+
+      # 3) Build Next.js
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Build Next.js
+        run: |
+          cd front-next
+          npm install
+          npm run build
+
+      # 4) Build Docker image for Next
+      - name: Build Docker image (Next)
+        run: |
+          cd front-next
+          docker build -t chjackpot/something-frontend:latest -f DockerFile .
+
+      # 5) Build Docker image for Nginx
+      - name: Build Docker image (Nginx)
+        run: |
+          cd nginx
+          docker build -t chjackpot/something-nginx:latest -f DockerFile .
+
+      # 6) Docker login
+      - name: DockerHub Login
+        run: |
+          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      # 7) Push images
+      - name: Push Docker images
+        run: |
+          docker push chjackpot/something-backend:latest
+          docker push chjackpot/something-frontend:latest
+          docker push chjackpot/something-nginx:latest
+
+      # 8) SSH to EC2 & docker-compose up
+      - name: SSH & Deploy
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Copy docker-compose to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no docker-compose.yml ec2-user@52.79.148.37:/home/ec2-user/docker-compose.yml
+
+      - name: Deploy on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@52.79.148.37 << 'EOF'
+            docker pull chjackpot/something-backend:latest
+            docker pull chjackpot/something-frontend:latest
+            docker pull chjackpot/something-nginx:latest
+          
+            docker-compose -f /home/ec2-user/docker-compose.yml up -d
+          EOF

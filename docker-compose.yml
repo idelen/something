@@ -1,0 +1,33 @@
+version: '3'
+services:
+  spring:
+    image: chjackpot/something-backend:latest
+    container_name: spring
+    expose:
+      - "8080"
+    networks:
+      - something-net
+
+  next:
+    image: chjackpot/something-frontend:latest
+    container_name: next
+    expose:
+      - "3000"
+    networks:
+      - something-net
+
+  nginx:
+    image: chjackpot/something-nginx:latest
+    container_name: nginx
+    depends_on:
+      - spring
+      - next
+    ports:
+      - "80:80"
+      # - "443:443" # if SSL
+    networks:
+      - something-net
+
+networks:
+  something-net:
+    driver: bridge

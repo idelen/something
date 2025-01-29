@@ -1,0 +1,14 @@
+# backend/Dockerfile
+FROM eclipse-temurin:17-jdk-alpine
+
+# 작업 디렉토리 생성
+WORKDIR /app
+
+# jar 파일을 컨테이너에 복사 (아래 단계에서 jar 생성된 후에)
+COPY build/libs/*.jar /app/something-backend.jar
+
+# Spring Boot 8080 포트
+EXPOSE 8080
+
+# 실행 커맨드
+CMD ["java", "-jar", "/app/something-backend.jar"]
