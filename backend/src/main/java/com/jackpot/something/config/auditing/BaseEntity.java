@@ -21,16 +21,18 @@ import lombok.Setter;
 public abstract class BaseEntity {
 
 	@CreatedDate
-	@Column(updatable = false)
+	@Column(updatable = false, nullable = false, columnDefinition = "datetime DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime createdDate;
 
 	@LastModifiedDate
+	@Column(nullable = false, columnDefinition = "datetime DEFAULT CURRENT_TIMESTAMP")
 	private ZonedDateTime modifiedDate;
 
 	@CreatedBy
-	@Column(updatable = false)
+	@Column(updatable = false, nullable = false)
 	private String createdBy;
 
 	@LastModifiedBy
+	@Column(nullable = false)
 	private String modifiedBy;
 }

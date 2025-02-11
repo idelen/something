@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jackpot.something.config.JwtTokenProvider;
 import com.jackpot.something.domain.account.domain.Account;
@@ -29,7 +30,7 @@ public class AccountService {
 
 	@PostConstruct
 	public void init() {
-		accountRepository.createNewAccount("user01", passwordEncoder.encode("1234"));
+		createNewAccount("user01", passwordEncoder.encode("1234"));
 	}
 
 	public LoginResponse login(LoginRequest loginRequest) {
@@ -43,8 +44,9 @@ public class AccountService {
 		return loginResponse;
 	}
 
+	@Transactional
 	public LoginResponse signup(SingUpRequest singupRequest) {
-		accountRepository.createNewAccount(singupRequest.getId(), passwordEncoder.encode(singupRequest.getPassword()));
+		createNewAccount(singupRequest.getId(), passwordEncoder.encode(singupRequest.getPassword()));
 
 		LoginRequest loginRequest = new LoginRequest();
 		loginRequest.setId(singupRequest.getId());
@@ -55,5 +57,13 @@ public class AccountService {
 
 	public Optional<Account> findByUserId(String userId) {
 		return accountRepository.findByUserId(userId);
+	}
+
+	@Transactional
+	public void createNewAccount(String userId, String password) {
+		Account account = new Account();
+		account.setUserId(userId);
+		account.setPassword(password);
+		accountRepository.save(account);
 	}
 }

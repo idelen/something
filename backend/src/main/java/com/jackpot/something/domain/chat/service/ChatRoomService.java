@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -15,7 +14,6 @@ import com.jackpot.something.domain.account.domain.Account;
 import com.jackpot.something.domain.account.dto.AccountDto;
 import com.jackpot.something.domain.account.service.AccountService;
 import com.jackpot.something.domain.chat.domain.ChatRoom;
-import com.jackpot.something.domain.chat.dto.ChatInputMessageDto;
 import com.jackpot.something.domain.chat.dto.ChatMessageDto;
 import com.jackpot.something.domain.chat.dto.ChatRoomCreateRequest;
 import com.jackpot.something.domain.chat.dto.ChatRoomItemResponse;
@@ -87,7 +85,7 @@ public class ChatRoomService {
 			Account account = creator.get();
 			accountDto.setId(account.getId());
 			accountDto.setName(account.getUserId());
-			accountDto.setUsername(account.getUsername());
+			accountDto.setUsername(account.getName());
 		}
 		return accountDto;
 	}
